@@ -14,7 +14,6 @@
   "keywords": [
     "gruntplugin"
   ],
-  "main": "Gruntfile.js",
   "engines": {
     "node": ">= 0.8.0"
   },
@@ -23,20 +22,15 @@
       "type": "MIT"
     }
   ],
-  "devDependencies": {
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-nodeunit": "~0.3.0",
-    "grunt": "~0.4.2",
-    "jshint-stylish": "~0.1.5",
-    "load-grunt-tasks": "~0.3.0"
-  },
-  "scripts": {
-    "test": "grunt test"
-  },
   "dependencies": {
-    "hooker": "~0.2.3",
     "ansi-to-html": "~0.1.1",
+    "content-type": "^1.0.1",
+    "debug": "^2.2.0",
+    "highland": "^2.5.1",
+    "hooker": "~0.2.3",
+    "http-proxy": "^1.11.1",
+    "replacestream": "^2.1.0",
+    "through": "^2.3.7",
     "ws": "~0.4.31"
   }
 }

@@ -1,104 +1,36 @@
-  (function grunt_browser_output(ssl){
+;(function grunt_browser_output(config) {
+    'use strict';
 
-    if (typeof ssl === 'undefined'){
-      var scripts= document.getElementsByTagName('script');
-      var path= scripts[scripts.length-1].src; 
-      var indexOfSsl = path.indexOf('ssl=');
-      ssl = (indexOfSsl === -1 ? false : path.substr(indexOfSsl + 4,4) === 'true');
+    config || (config = {})
+    var script = document.querySelector('[data-id="grunt-browser-output"]')
+        , wsTarget = config.target || (config.ssl ? 'wss' : 'ws') + '://' + location.hostname + ':' + location.port
+        , connection
+
+    if(typeof WebSocket === undefined) {
+        return console.log('grunt-browser-output - websockets not available')
     }
 
-    var state = document.readyState;
-    if(state !== 'interactive' && state !== 'complete') {
-      setTimeout(grunt_browser_output.bind(this,ssl), 100);
-      return;
+    Notification.requestPermission()
+
+    ;(function createConnection() {
+        try { connection && connection.close() } catch(e) {}
+        connection = new WebSocket(wsTarget)
+        connection.onmessage = onmessage
+        connection.onclose = function() { setTimeout(createConnection(), 250) }
+    })()
+    function onmessage(e) {
+        var data = JSON.parse(e.data)
+            , opts = {
+                timeout: 10000
+                , icon: config.icon || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAEiQAABIkByt38eQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAALDSURBVFiFrZfPb0xRFMc/7/WHqi7apNSMBJmwkKiF2EkkFlqzKAv+nBIL4lcqSmgbdliSNBbVKCK6kcYGsRBp9EcQmlYx01odi7nDmTPvde4dPcnLO3Pv93zPuefdueeeCE8R2AgcAY4Du4FOYLOb/gYsAO+BUWAighVf7lqOswK3BQoC4vn8ErglkPkfx80Cpx2Zr2P7/BToF2hO8xOlOO8C7gMHq6eYAsaBj8AXN54BdgK9wIEE3hfAyQi++qx8n8BsQkrP+aTUfbLzCZmbEej2MZ43hqMuI0EisFXgoeGaS12EQKvAlDEYEIhT8EcFFt1zJwXTIHDFcL50/6gq8AUDHKyxwj6FfVADe81wn7WAbQJFBXgk0LCOATQKPDZ7KqMBI2pyVWDHWoShATh8TuC3srlZnmgxO/ZSLbJ6AnA2A+aMaImBw8AmhRv2ISvxJepryZDS24BDMdCnBt9EMO1Jtqp0r3M/gg/AOzV0LAb2qIFxT+cABaUXA+zGlL4/BrJqYC6ASDstpKKqRWcgZwP4VGcAIRlYUHq7PeV8NxPAktK/B9hVFKoY+Kx+Z/GUqLSS8spnAwLoVPpyTGXatwcQAcybt4/oTT8dU7kpegMDmDNvH8kr/RUCeVMocr5MAm0CHZJysUnA7zK+ehBoElhSg9cDVhMkAkPKz6JAU3liOLQYObtGgVZPrC1GN/RkxhQkn3LcI7Ds8CMegepy/EPsLUvgjPk+V2uQThh8atYSLiT9SaBmgUkDHBRoTCG9p3BFgfaUlVvnz/9++wSDLqm+ET+R0pXbYrMCdwWeSmVFLc/nBJ4ZrhmBLWmZKht2JwSxInBRPE5KF9hlt5mt870WX29jMga85V8N6KBEnie5MZkETng1JsrTBlmf1uyUrNGa+QRST3NaEM/m1OsIdYHo9rybUuEqV7YFShXxNYHt+R/R00Ilgd/IYwAAAABJRU5ErkJggg=='
+            }
+
+        opts.body = data.body
+
+        if(Notification.permission === 'granted') {
+            var notification = new Notification( data.title, opts )
+            if( opts.timeout ) setTimeout( notification.close.bind(notification) , opts.timeout )
+        }
+        else console.log( data.title + (data.body ? ': ' + data.body : '') )
     }
-
-    if (typeof WebSocket === undefined){
-      console.log('grunt-browser-output - websockets not available');
-      return;
-    }
-
-    var protocol = ssl ? 'wss' : 'ws';
-
-    var connection = new WebSocket(protocol + '://' + location.hostname + ':37901');
-    connection.onmessage = function(e){
-      var data = JSON.parse(e.data);
-      var pre = document.querySelector('#grunt-browser-output>pre');
-      if (data.line) {
-        $('#grunt-browser-output>pre').append(data.line);
-        pre.scrollTop = pre.scrollHeight;
-      }
-      if (data.removeLine) {
-        pre.removeChild(pre.children[pre.children.length-1]);
-      }
-      if (data.isError) {
-        document.querySelector('#grunt-browser-output').style.display = 'block';
-      }
-
-      while (pre.children.length > 300) {
-        pre.removeChild(pre.children[0]);
-      }
-      //need to delete the lines over time else the browser will get bogged down
-    };
-
-    var elem = document.createElement('div');
-    elem.id = 'grunt-browser-output';
-    elem.style.display = 'none';
-    elem.style.position = 'fixed';
-    elem.style.top = elem.style.left = elem.style.bottom = elem.style.right = '10px';
-    elem.style.paddingTop = '0px';
-    elem.style.zIndex = 9999999;
-
-    var pre = document.createElement('pre');
-    pre.style.backgroundColor = 'black';
-    pre.style.color = '#CCC';
-    pre.style.position = 'absolute';
-    pre.style.top = pre.style.left = pre.style.bottom = pre.style.right = '0px';
-    pre.style.overflowY = 'scroll';
-    pre.style.marginBottom = '0px';
-    elem.appendChild(pre);
-
-    var toolbar = document.createElement('div');
-    toolbar.style.position = 'absolute';
-    toolbar.style.top = '5px';
-    toolbar.style.right = '25px';
-    toolbar.style.zIndex = 999999;
-    elem.appendChild(toolbar);
-
-    var link = document.createElement('a');
-    link.style.color = 'grey';
-    link.href = 'http://github.com/cgross/grunt-browser-output';
-    link.innerHTML = 'grunt-browser-output';
-    toolbar.appendChild(link);
-
-    var sep = document.createElement('span');
-    sep.innerHTML = ' | ';
-    toolbar.appendChild(sep);
-
-    link = document.createElement('a');
-    link.style.color = 'grey';
-    link.href = '#';
-    link.innerHTML = 'clear';
-    link.addEventListener('click',function(e){
-      e.preventDefault();
-      pre.innerHTML = '';
-    });
-    toolbar.appendChild(link);
-
-    sep = document.createElement('span');
-    sep.innerHTML = ' | ';
-    toolbar.appendChild(sep);
-
-    link = document.createElement('a');
-    link.style.color = 'grey';
-    link.href = '#';
-    link.innerHTML = 'close';
-    link.addEventListener('click',function(e){
-      e.preventDefault();
-      elem.style.display = 'none';
-    });
-    toolbar.appendChild(link);
-
-    document.body.appendChild(elem);
-
-})();
+})

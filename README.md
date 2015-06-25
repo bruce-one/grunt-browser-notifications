@@ -1,75 +1,64 @@
-# grunt-browser-output
+Grunt browser notifications
+===========================
 
-> Show grunt errors in a popup window in your browser.
+A fork of https://github.com/cgross/grunt-browser-output using HTML5 desktop
+notifications.
 
-This plugin will mirror the Grunt console output in a browser window when a plugin
-shows warnings or errors. The motivation is to avoid having to toggle back to a terminal window to see errors
-(ex. JSHint warnings) during a grunt/watch/livereload session.
+Hence this project only supports browsers that support HTML5 notifications (and
+also websockets).
 
-![](screenshot.png)
+What it does
+------------
 
-Only works in modern browsers with WebSocket support.
+The code in here will launch a websocket for telling clients to show errors as
+they're encountered.
 
-## Getting Started
+There's also a connect middleware for injecting a client script for showing said
+errors.
 
-```shell
-npm install grunt-browser-output --save-dev
-```
+Then, there's a http proxy which can proxy requests to a connect application (eg
+running on port 80) and forward them to the websocket (so that the client only
+ever needs to connect to the one port (as far as it's concerned)).
 
-Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
+Finally, there's a script which hooks grunt.log.error and basically just assumes
+anything written to it is an error. The hook will then send errors it encounters
+to the central websocket, which then rebroadcasts them. This is to support
+(things like) grunt concurrent which spawn multiple processes.
 
-```js
-grunt.loadNpmTasks('grunt-browser-output');
-```
+At the moment, the notification just disappears after a timeout. It'd be cool to
+be cleverer than that :-)
 
-**Important: Using this plugin with `grunt-contrib-watch` and `livereload` requires `grunt-contrib-watch` version `0.6.0` or higher and you must configure [livereloadOnError = false](https://github.com/gruntjs/grunt-contrib-watch#optionslivereloadonerror).**
+Basic example
+-------------
 
-## The "browser_output" task
+*The following probably doesn't work in practice, if you're actually interested
+in using this, ping me and I'll fix this doc.*
 
-### Overview
-In your project's Gruntfile, add a section named `browser_output` to the data object passed into `grunt.initConfig()`.
-
-```js
-grunt.initConfig({
-  browser_output: {
-    options: {       //all options are optional
-      port: 37901    //default is 37901
+    module.exports = function(grunt) {
+        var gruntBrowserOutput = require('grunt-browser-output')(grunt) // Setup in all processes to hook log
+        grunt.initConfig({
+            server: {
+                options: {
+                    onCreateServer: [ gruntBrowserOutput.createServer ] // Create websocket proxy (somewhat optional)
+                    , middleware: function(connect) {
+                        return [
+                            gruntBrowserOutput.middleware // Add client snippet
+                            ]
+                    }
+                }
+            }
+            , browser_output: {
+                options: {
+                    port: 37901 // Optional port, defaults to 37901
+                }
+            }
+            , concurrent: {
+                target: {
+                    tasks: [ 'connect:server', 'watch', 'browserify', 'supervisor', 'browser_output' ] // Example with grunt concurrent - the browser_output task will run a websocket server, other tasks are just examples
+                }
+            }
+        })
     }
-  },
-})
-```
 
-Add `browser_output` before your `watch` task.
-
-```js
-grunt.registerTask('serve', ['browser_output','connect', 'watch']);
-```
-
-Finally, add the following script tag to your web page:
-```html
-<script src="node_modules/grunt-browser-output/client.js"></script>
-```
-
-### HTTPS/SSL
-
-If you run your site over HTTPS, you'll likely want to configure this task to also use HTTPS.  Change the task config:
-
-```js
-grunt.initConfig({
-  browser_output: {
-    options: {
-       ssl: true,
-       key: grunt.file.read('path/to/server.key'),
-       cert: grunt.file.read('path/to/server.crt')
-    }
-  },
-})
-```
-And in your index.html add put `?ssl=true` on the end of the client.js script tag:
-
-```html
-<script src="node_modules/grunt-browser-output/client.js?ssl=true"></script>
-```
-
-## Release History
- - 3/13/2014 - v0.1.0 - Initial release.
+Then running `grunt concurrent` will start the browser_output service and when a
+compatible browser connects, it will receive messages from grunt.log.error.

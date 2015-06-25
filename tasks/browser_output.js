@@ -1,69 +1,61 @@
 'use strict';
-var hooker = require('hooker');
-var convert = new (require('ansi-to-html'))();
-var ws = require('ws');
+var hooker = require('hooker')
+    , ws = require('ws')
+    , debug = require('debug')('grunt-browser-output')
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
 
-  grunt.registerTask('browser_output', 'Redirect grunt output to the browser.', function () {
+  grunt.registerTask('browser_output', 'Redirect grunt output to the browser.', function() {
 
-    var options = this.options({port:37901});
+    var options = this.options({port: 37901})
 
     //start server
-    var WebSocketServer = ws.Server;
+    var WebSocketServer = ws.Server
 
-    var wss;
-    if (!options.ssl){
-      wss = new WebSocketServer({port: options.port});
+    var wss
+    if(!options.ssl){
+      wss = new WebSocketServer({port: options.port})
     } else {
-      var processRequest = function (req, res) {
-        res.writeHead(200, {'Content-Type': 'text/plain'});
-        res.end('Not implemented');
-      };
+      var processRequest = function(req, res) {
+        res.writeHead(200, {'Content-Type': 'text/plain'})
+        res.end('Not implemented')
+      }
       var app = require('https').createServer({
         key: options.key,
         cert: options.cert,
         passphrase: options.passphrase
-      },processRequest).listen(options.port);
+      }, processRequest).listen(options.port)
 
-      wss = new WebSocketServer({server:app});
+      wss = new WebSocketServer({server: app})
+      debug('Created websocket server')
     }
 
-
     wss.broadcast = function(data) {
+      debug('Sending %s to %d clients ', data, this.clients.length)
       for(var i in this.clients) {
-        this.clients[i].send(JSON.stringify(data));
+        this.clients[i].send(data)
       }
-    };
+    }
 
-    hooker.hook(process.stdout,'write', function() {
+    wss.on('connection', function(ws) {
+      ws.on('message', function(data) {
+        debug('Websocket server received message %s', data)
+      })
+      ws.on('message', wss.broadcast.bind(wss))
+    })
 
-      var data = {};
-
-      if (arguments[0] === '\x1b[2K') {
-        data = {removeLine:true};
-      } else if (arguments[0] === '\x1b[1G'){
-        //do nothing
-        return;
-      } else {
-        var html = convert.toHtml(arguments[0]);
-        // var html = ansi_up.ansi_to_html(arguments[0]);
-        if (html[0] !== '<') {
-          html = '<span>' + html + '</span>';
-        }
-        //such hack
-        html = html.replace(/color:#A50/gm,'color:#F0E68C');
-        data = {
-          line: html,
-          orig: arguments[0],
-          //such hack, much wow
-          isError: arguments[0].indexOf('Warning:') === 5
-        };
+    hooker.hook(grunt.log, 'error', function(msg) {
+      if(!( msg && msg.toString ) ) return
+      var message = msg.toString()
+      var data = {
+        title: message.replace(/:.*$/, '')
+        , body: message.replace(/^[:]*:/, '')
+        , isError: true
       }
+      if(data.title == data.body) data.title = 'Error'
+      wss.broadcast(JSON.stringify(data))
+    })
 
-      wss.broadcast(data);
-    });
-
-  });
-
-};
+    this.async()
+  })
+}
