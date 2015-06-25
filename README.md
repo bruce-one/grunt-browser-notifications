@@ -62,3 +62,8 @@ in using this, ping me and I'll fix this doc.*
 
 Then running `grunt concurrent` will start the browser_notifications service and when a
 compatible browser connects, it will receive messages from grunt.log.error.
+
+TODO
+----
+
+Doesn't support gzipped contents atm...
