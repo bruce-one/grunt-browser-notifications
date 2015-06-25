@@ -1,13 +1,12 @@
-;(function grunt_browser_output(config) {
+;(function grunt_browser_notifications(config) {
     'use strict';
 
     config || (config = {})
-    var script = document.querySelector('[data-id="grunt-browser-output"]')
-        , wsTarget = config.target || (config.ssl ? 'wss' : 'ws') + '://' + location.hostname + ':' + location.port
+    var wsTarget = config.target || (config.ssl ? 'wss' : 'ws') + '://' + location.hostname + ':' + location.port
         , connection
 
     if(typeof WebSocket === undefined) {
-        return console.log('grunt-browser-output - websockets not available')
+        return console.log('grunt-browser-notifications - websockets not available')
     }
 
     Notification.requestPermission()

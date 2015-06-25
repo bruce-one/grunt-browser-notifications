@@ -1,11 +1,11 @@
 'use strict';
 var hooker = require('hooker')
     , ws = require('ws')
-    , debug = require('debug')('grunt-browser-output')
+    , debug = require('debug')('grunt-browser-notifications')
 
 module.exports = function(grunt) {
 
-  grunt.registerTask('browser_output', 'Redirect grunt output to the browser.', function() {
+  grunt.registerTask('browser_notifications', 'Redirect grunt output to the browser for html5 notifications.', function() {
 
     var options = this.options({port: 37901})
 

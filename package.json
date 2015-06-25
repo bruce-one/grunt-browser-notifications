@@ -1,16 +1,12 @@
 {
-  "name": "grunt-browser-output",
-  "version": "1.0.3",
+  "name": "grunt-browser-notifications",
+  "version": "0.0.1",
   "description": "Redirect grunt output to the browser.",
   "repository": {
     "type": "git",
-    "url": "git://github.com/cgross/grunt-browser-output.git"
+    "url": "git://github.com/bruce-one/grunt-browser-notifications.git"
   },
-  "homepage": "https://github.com/cgross/grunt-browser-output",
-  "author": {
-    "name": "Chris Gross",
-    "email": "schtoo@schtoo.com"
-  },
+  "homepage": "https://github.com/bruce-one/grunt-browser-notifications",
   "keywords": [
     "gruntplugin"
   ],
@@ -23,7 +19,6 @@
     }
   ],
   "dependencies": {
-    "ansi-to-html": "~0.1.1",
     "content-type": "^1.0.1",
     "debug": "^2.2.0",
     "highland": "^2.5.1",

@@ -2,7 +2,7 @@
 
 var _ = require('highland')
     , replacestream = require('replacestream')
-    , debug = require('debug')('grunt-browser-output')
+    , debug = require('debug')('grunt-browser-notifications')
     , through = require('through')
     , util = require('util')
     , path = require('path')
@@ -17,8 +17,7 @@ module.exports = function(grunt, opts) {
     var scriptContents
         , script
         , port = function() {
-            debug('tmp: %j', grunt.config.get('browser_output.options.port'))
-            return grunt.config.get('browser_output.options.port') || 37901
+            return grunt.config.get('browser_notifications.options.port') || 37901
         }
         , wsClient
 
@@ -49,7 +48,7 @@ module.exports = function(grunt, opts) {
     })
 
     function gruntBrowserOutputCreateServer(server, connect, options) {
-        var proxy = new httpProxy.createProxyServer({ target: opts.target || { host: 'localhost', port: port() } })
+        var proxy = new httpProxy.createProxyServer({ target: opts.target || { host: 'localhost', port: port() } }) //TODO
         debug('Setting up websocket proxy')
         server.on('upgrade', function (req, socket, head) {
             debug('Websocket detected, proxying')

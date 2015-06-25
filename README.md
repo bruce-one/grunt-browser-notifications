@@ -35,7 +35,7 @@ Basic example
 in using this, ping me and I'll fix this doc.*
 
     module.exports = function(grunt) {
-        var gruntBrowserOutput = require('grunt-browser-output')(grunt) // Setup in all processes to hook log
+        var gruntBrowserOutput = require('grunt-browser-notifications')(grunt) // Setup in all processes to hook log
         grunt.initConfig({
             server: {
                 options: {
@@ -47,18 +47,18 @@ in using this, ping me and I'll fix this doc.*
                     }
                 }
             }
-            , browser_output: {
+            , browser_notifications: {
                 options: {
                     port: 37901 // Optional port, defaults to 37901
                 }
             }
             , concurrent: {
                 target: {
-                    tasks: [ 'connect:server', 'watch', 'browserify', 'supervisor', 'browser_output' ] // Example with grunt concurrent - the browser_output task will run a websocket server, other tasks are just examples
+                    tasks: [ 'connect:server', 'watch', 'browserify', 'supervisor', 'browser_notifications' ] // Example with grunt concurrent - the browser_notifications task will run a websocket server, other tasks are just examples
                 }
             }
         })
     }
 
-Then running `grunt concurrent` will start the browser_output service and when a
+Then running `grunt concurrent` will start the browser_notifications service and when a
 compatible browser connects, it will receive messages from grunt.log.error.
