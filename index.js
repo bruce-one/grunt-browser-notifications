@@ -25,7 +25,7 @@ module.exports = function(grunt, opts) {
         err && debug('Websocket client err, will retry')
         wsClient && wsClient.removeAllListeners()
         setTimeout(function() {
-            debug('Creating client to ' + port)
+            debug('Creating client to ' + port())
             wsClient = new WebSocket('ws://localhost:' + port() )
             wsClient.on('error', setupClient)
         }, 1000) // Don't hog the loop
