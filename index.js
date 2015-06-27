@@ -51,7 +51,7 @@ module.exports = function(grunt, opts) {
         var proxy = new httpProxy.createProxyServer({ target: opts.target || { host: 'localhost', port: port() } }) //TODO
         debug('Setting up websocket proxy')
         server.on('upgrade', function (req, socket, head) {
-            debug('Websocket detected, proxying')
+            debug('Websocket detected, proxying') // TODO check url
             proxy.ws(req, socket, head);
         })
     }
