@@ -61,6 +61,7 @@ module.exports = function(grunt, opts) {
             , _writeHead = res.writeHead
             , interceptor = _()
             , pipeline
+            , writeHeadCalled = false
 
         scriptContents || (scriptContents = fs.readFileSync(path.join(__dirname, 'client.js'), 'utf8')) // TODO Clean this file read, and async it
         script || (script = util.format('<script>%s(%j)</script>', scriptContents, opts))
@@ -83,12 +84,18 @@ module.exports = function(grunt, opts) {
 
         res.write = function(data, encoding) { // This hopes that the encoding is always the same :-s
             debug('Intercepting response write, encoding is: ' + encoding)
+            if(!writeHeadCalled) {
+                debug('Calling writeHead with status 200 as it hasn\'t been called yet')
+                res.writeHead(200)
+            }
             if( encoding == 'utf8' || encoding == 'ascii' || encoding == '' || encoding == undefined) {
                 debug('Writing to interceptor')
                 interceptor.write(data)
+                res.write = interceptor.write.bind(interceptor) // Don't change now
             } else {
                 debug('Not intercepting request because the encoding is not supported')
                 _write.apply(res, arguments)
+                res.write = _write.bind(res)
                 res.end = _end.bind(res)
             }
         }
@@ -99,7 +106,9 @@ module.exports = function(grunt, opts) {
         }
 
         res.writeHead = function() {
+            debug('writeHead called for request')
             var isHtml = false
+            writeHeadCalled = true
             res.removeHeader('content-length')
             _writeHead.apply(res, arguments)
 
