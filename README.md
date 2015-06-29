@@ -47,6 +47,34 @@ in using this, ping me and I'll fix this doc.*
                     }
                 }
             }
+            , browser_notifications: {} // Just using defaults
+            , concurrent: {
+                target: {
+                    tasks: [ 'connect:server', 'watch', 'browserify', 'supervisor', 'browser_notifications' ] // Example with grunt concurrent - the browser_notifications task will run a websocket server, other tasks are just examples
+                }
+            }
+        })
+    }
+
+Then running `grunt concurrent` will start the browser_notifications service and when a
+compatible browser connects, it will receive messages from grunt.log.error.
+
+A more complete example
+-----------------------
+
+    module.exports = function(grunt) {
+        var gruntBrowserOutput = require('grunt-browser-notifications')(grunt) // Setup in all processes to hook the grunt error log
+        grunt.initConfig({
+            server: {
+                options: {
+                    onCreateServer: [ gruntBrowserOutput.createServer ] // Create websocket proxy (somewhat optional - otherwise you'll likely need to specify the "target" option)
+                    , middleware: function(connect) {
+                        return [
+                            gruntBrowserOutput.middleware // Add client snippet
+                        ]
+                    }
+                }
+            }
             , browser_notifications: {
                 options: {
                     port: 37902 // Optional port, defaults to 37902. This is used for the main websocket server, and also from other grunt processes which connect to the main websocket server.
@@ -63,6 +91,3 @@ in using this, ping me and I'll fix this doc.*
             }
         })
     }
-
-Then running `grunt concurrent` will start the browser_notifications service and when a
-compatible browser connects, it will receive messages from grunt.log.error.

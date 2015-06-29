@@ -31,7 +31,7 @@ module.exports = function(grunt) {
     }
 
     wss.broadcast = function(data) {
-      debug('Sending %s to %d clients ', data, this.clients.length)
+      debug('Sending %j to %d clients ', data, this.clients.length)
       this.clients.forEach(function(client) {
         client.send(data)
       })
