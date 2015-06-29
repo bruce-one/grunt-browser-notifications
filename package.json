@@ -24,6 +24,7 @@
     "highland": "^2.5.1",
     "hooker": "~0.2.3",
     "http-proxy": "^1.11.1",
+    "on-headers": "^1.0.0",
     "replacestream": "^2.1.0",
     "through": "^2.3.7",
     "ws": "~0.4.31"
