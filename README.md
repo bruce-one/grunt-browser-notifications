@@ -43,13 +43,14 @@ in using this, ping me and I'll fix this doc.*
                     , middleware: function(connect) {
                         return [
                             gruntBrowserOutput.middleware // Add client snippet
-                            ]
+                        ]
                     }
                 }
             }
             , browser_notifications: {
                 options: {
                     port: 37901 // Optional port, defaults to 37901
+                    , gzip: true // Optionally decompress and recompress gzip html to add the client snippet (default false, this can be avoided by compressing after this middleware if possible)
                 }
             }
             , concurrent: {
@@ -62,8 +63,3 @@ in using this, ping me and I'll fix this doc.*
 
 Then running `grunt concurrent` will start the browser_notifications service and when a
 compatible browser connects, it will receive messages from grunt.log.error.
-
-TODO
-----
-
-Doesn't support gzipped contents atm...
