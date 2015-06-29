@@ -21,13 +21,14 @@ module.exports = function(grunt) {
         , wsClient
         , debugging = !!process.env.DEBUG
         , getConfig = function(key) { return grunt.config.get( key ? ('browser_notifications.options.' + key) : 'browser_notifications.options') }
+        , DEFAULT_PORT = 37901
 
     ;(function setupClient(err) {
         err && debug('Websocket client err, will retry')
         wsClient && wsClient.removeAllListeners()
         setTimeout(function() {
-            debug('Creating client to ' + getConfig('port'))
-            wsClient = new WebSocket('ws://localhost:' + getConfig('port') )
+            debug('Creating client to ' + getConfig('port') || DEFAULT_PORT)
+            wsClient = new WebSocket('ws://localhost:' + getConfig('port') || DEFAULT_PORT )
             wsClient.on('error', setupClient)
         }, 1000) // Don't hog the loop
     })()
@@ -50,7 +51,7 @@ module.exports = function(grunt) {
     })
 
     function gruntBrowserOutputCreateServer(server, connect, options) {
-        var proxyConfig = { target: getConfig('proxyTarget') || { host: 'localhost', port: getConfig('port') || 37901 } }
+        var proxyConfig = { target: getConfig('proxyTarget') || { host: 'localhost', port: getConfig('port') || DEFAULT_PORT } }
             , proxy = new httpProxy.createProxyServer(proxyConfig)
 
         debug('Setting up websocket proxy to %j', proxyConfig)
