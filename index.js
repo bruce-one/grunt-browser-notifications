@@ -130,7 +130,6 @@ module.exports = function(grunt, opts) {
 
         onHeaders(res, function() {
             var isHtml = false
-                , contentEncoding
 
             debug('Headers available for request')
 
@@ -141,9 +140,7 @@ module.exports = function(grunt, opts) {
                 isHtml = (contentType.parse(res).type == 'text/html')
             } catch(e) {}
 
-            contentEncoding = res.getHeader('content-encoding')
-
-            prepareInterceptor(isHtml, contentEncoding)
+            prepareInterceptor(isHtml, res.getHeader('content-encoding'))
         })
         next()
     }
