@@ -2,7 +2,7 @@
     'use strict';
 
     config || (config = {})
-    var wsTarget = config.target || (config.ssl ? 'wss' : 'ws') + '://' + location.hostname + ':' + location.port
+    var wsTarget = config.target || (config.ssl ? 'wss' : 'ws') + '://' + location.hostname + ':' + location.port + config.wsUrl
         , connection
 
     if(typeof WebSocket === undefined) {
