@@ -49,10 +49,10 @@ in using this, ping me and I'll fix this doc.*
             }
             , browser_notifications: {
                 options: {
-                    port: 37901 // Optional port, defaults to 37901. This is used for the main websocket server, and also from other grunt processes which connect to the main websocket server.
+                    port: 37902 // Optional port, defaults to 37902. This is used for the main websocket server, and also from other grunt processes which connect to the main websocket server.
                     , gzip: true // Optionally decompress and recompress gzip html to add the client snippet (default false, this can be avoided by compressing after this middleware if possible).
                     , wsUrl: '/grunt-browser-notifications' // add a proxy from this (exact) path in the connect server to the websocket server. This is where the client will attempt to connect to as well (unless target is specified).
-                    , target: undefined // add a string to specify where the client websocket should try and connect to. Defaults to endpoint where the script came from. A likely example could be 'ws://localhost:37901/' to connect to the websocket directly (not via the proxy).
+                    , target: undefined // add a string to specify where the client websocket should try and connect to. Defaults to endpoint where the script came from. A likely example could be 'ws://localhost:37902/' to connect to the websocket directly (not via the proxy).
                     , proxyTarget: undefined // add a string to specify where the websocket proxy should proxy to. Defaults to localhost:{{port}}.
                 }
             }

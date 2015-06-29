@@ -21,7 +21,7 @@ module.exports = function(grunt) {
         , wsClient
         , debugging = !!process.env.DEBUG
         , getConfig = function(key) { return grunt.config.get( key ? ('browser_notifications.options.' + key) : 'browser_notifications.options') }
-        , DEFAULT_PORT = 37901
+        , DEFAULT_PORT = 37902
 
     ;(function setupClient(err) {
         err && debug('Websocket client err, will retry')

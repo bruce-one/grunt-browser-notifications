@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('browser_notifications', 'Redirect grunt output to the browser for html5 notifications.', function() {
 
-    var options = this.options({port: 37901})
+    var options = this.options({port: 37902})
 
     //start server
     var WebSocketServer = ws.Server
