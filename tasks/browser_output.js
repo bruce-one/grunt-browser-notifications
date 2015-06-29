@@ -32,9 +32,9 @@ module.exports = function(grunt) {
 
     wss.broadcast = function(data) {
       debug('Sending %s to %d clients ', data, this.clients.length)
-      for(var i in this.clients) {
-        this.clients[i].send(data)
-      }
+      this.clients.forEach(function(client) {
+        client.send(data)
+      })
     }
 
     wss.on('connection', function(ws) {
