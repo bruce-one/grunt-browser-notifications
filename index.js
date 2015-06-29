@@ -15,17 +15,12 @@ var _ = require('highland')
     , zlib = require('zlib')
     , onHeaders = require('on-headers')
 
-module.exports = function(grunt, opts) {
-    opts || (opts = {})
+module.exports = function(grunt) {
     var scriptContents
         , script
-        , port = function() { // The grunt config may not be ready on first load
-            return grunt.config.get('browser_notifications.options.port') || 37901
-        }
         , wsClient
         , debugging = !!process.env.DEBUG
-
-    opts.wsUrl === undefined && (opts.wsUrl = '/grunt-browser-notifications')
+        , getConfig = function(key) { return grunt.config.get( key ? ('browser_notifications.options.' + key) : 'browser_notifications.options') }
 
     ;(function setupClient(err) {
         err && debug('Websocket client err, will retry')
@@ -36,12 +31,13 @@ module.exports = function(grunt, opts) {
             wsClient.on('error', setupClient)
         }, 1000) // Don't hog the loop
     })()
+
     hooker.hook(grunt.log, 'error', function(msg) {
       if(! (msg && msg.toString()) ) return
       var message = msg.toString()
       var data = {
-        title: message.replace(/:.*$/, '')
-        , body: message.replace(/^[:]*:/, '')
+        title: message.replace(/:.*$/, '') // TODO make configurable
+        , body: message.replace(/^[:]*:/, '') // TODO make configurable
         , isError: true
       }
       if(data.title == data.body) data.title = 'Error'
@@ -54,11 +50,13 @@ module.exports = function(grunt, opts) {
     })
 
     function gruntBrowserOutputCreateServer(server, connect, options) {
-        var proxy = new httpProxy.createProxyServer({ target: opts.target || { host: 'localhost', port: port() } }) //TODO
-        debug('Setting up websocket proxy')
+        var proxyConfig = { target: getConfig('proxyTarget') || { host: 'localhost', port: getConfig('port') || 37901 } }
+            , proxy = new httpProxy.createProxyServer(proxyConfig)
+
+        debug('Setting up websocket proxy to %j', proxyConfig)
         server.on('upgrade', function (req, socket, head) {
-            if(opts.wsUrl !== true && req.url != opts.wsUrl) { // True for any url
-                debug('Websocket detected, but wrong url (%s != %s), not proxying.', req.url, opts.wsUrl)
+            if( req.url != (getConfig('wsUrl') || '/grunt-browser-notifications') ) { // True for any url
+                debug('Websocket detected, but wrong url (%s != %s), not proxying.', req.url, getConfig('wsUrl') || '/grunt-browser-notifications')
                 return
             }
             debug('Websocket to %s detected, proxying', req.url)
@@ -74,7 +72,7 @@ module.exports = function(grunt, opts) {
             , headersReady = false
 
         scriptContents || (scriptContents = fs.readFileSync(path.join(__dirname, 'client.js'), 'utf8')) // TODO Clean this file read, and async it
-        script || (script = util.format('<script>%s(%j)</script>', scriptContents, opts))
+        script || (script = util.format('<script>%s(%j)</script>', scriptContents, getConfig()) )
 
         debug('Preparing to add script to request')
 
@@ -91,11 +89,11 @@ module.exports = function(grunt, opts) {
             var pipelineArr = []
                 , compressor
 
-            if(opts.gzip && contentEncoding) {
+            if(getConfig('gzip') && contentEncoding) {
                 debug('Will decompress (and recompress) %s content to add snippet', contentEncoding)
                 pipelineArr.push( _.through( zlib.createUnzip() ) )
                 compressor = _.through( zlib['create' + (contentEncoding.charAt(0).toUpperCase() + contentEncoding.slice(1))]() )
-            } else if(contentEncoding && !opts.gzip) {
+            } else if(contentEncoding && !getConfig('gzip')) {
                 debug('Ignoring %s content because the gzip option is falsy.', contentEncoding)
                 return interceptor.pipe(getInterceptorTarget())
             }
