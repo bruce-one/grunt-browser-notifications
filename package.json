@@ -1,7 +1,7 @@
 {
   "name": "grunt-browser-notifications",
   "version": "0.0.1",
-  "description": "Redirect grunt output to the browser.",
+  "description": "Redirect grunt error logs to HTML5 desktop notifications.",
   "repository": {
     "type": "git",
     "url": "git://github.com/bruce-one/grunt-browser-notifications.git"
@@ -11,7 +11,7 @@
     "gruntplugin"
   ],
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 0.10.0"
   },
   "licenses": [
     {
