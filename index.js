@@ -62,7 +62,7 @@ module.exports = function(grunt) {
 
         debug('Setting up websocket proxy to %j', proxyConfig)
         proxy.on('error', function(err) {
-            grunt.verbose('Error whilst proxying websocket (the error will be ignored): %s', err.stack)
+            grunt.verbose.write('Error whilst proxying websocket (the error will be ignored): %s', err.stack)
         })
         server.on('upgrade', function (req, socket, head) {
             if( req.url != getConfig('wsUrl') ) { // True for any url
