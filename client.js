@@ -4,6 +4,7 @@
     config || (config = {})
     var wsTarget = config.target || (config.ssl ? 'wss' : 'ws') + '://' + location.hostname + ':' + location.port + config.wsUrl
         , connection
+        , backoff = 0
 
     if(typeof WebSocket === undefined) {
         return console.log('grunt-browser-notifications - websockets not available')
@@ -14,9 +15,11 @@
     ;(function createConnection() {
         try { connection && connection.close() } catch(e) {}
         connection = new WebSocket(wsTarget)
+        connection.onopen = function() { backoff = 0 }
         connection.onmessage = onmessage
-        connection.onclose = function() { setTimeout(createConnection(), 250) }
+        connection.onclose = function() { setTimeout(createConnection(), (250 * ( backoff = Math.min(8, backoff + 1) )) }
     })()
+
     function onmessage(e) {
         var data = JSON.parse(e.data)
             , opts = {
