@@ -80,6 +80,7 @@ module.exports = function(grunt) {
             , _writeHead = res.writeHead
             , interceptor = _()
             , headersReady = false
+            , hasBody = false
 
         scriptContents || (scriptContents = fs.readFileSync(path.join(__dirname, 'client.js'), 'utf8')) // TODO Clean this file read, and async it
         script || (script = util.format('<script>%s(%j)</script>', scriptContents, getConfig()) )
@@ -123,6 +124,7 @@ module.exports = function(grunt) {
 
         res.write = function(data, encoding) {
             debug('Intercepting response write')
+            hasBody = true
             if(!headersReady) { // Need to call writeHead to setup the interceptor
                 debug('Calling writeHead with status 200 as it hasn\'t been called yet')
                 res.writeHead(200)
@@ -133,7 +135,14 @@ module.exports = function(grunt) {
         res.end = function(data, encoding) {
             debug('Ending')
             data && res.write(data, encoding)
-            interceptor.end()
+            if(hasBody) {
+                debug('Ending interceptor')
+                interceptor.end()
+            } else {
+                debug('Ending with no body')
+                _end.apply(res, arguments)
+                interceptor.destroy()
+            }
         }
 
         onHeaders(res, function() {
