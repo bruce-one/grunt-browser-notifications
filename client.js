@@ -17,7 +17,7 @@
         connection = new WebSocket(wsTarget)
         connection.onopen = function() { backoff = 0 }
         connection.onmessage = onmessage
-        connection.onclose = function() { setTimeout(createConnection(), (250 * ( backoff = Math.min(8, backoff + 1) )) }
+        connection.onclose = function() { setTimeout(createConnection(), (250 * ( backoff = Math.min(8, backoff + 1) ))) }
     })()
 
     function onmessage(e) {
