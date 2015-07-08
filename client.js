@@ -6,8 +6,11 @@
         , connection
         , backoff = 0
 
-    if(typeof WebSocket === undefined) {
-        return console.log('grunt-browser-notifications - websockets not available')
+    if(typeof WebSocket === 'undefined' || typeof Notification === 'undefined') {
+        if(typeof console !== 'undefined') {
+            console.log('grunt-browser-notifications - websockets or notifications not available')
+        }
+        return
     }
 
     Notification.requestPermission()
