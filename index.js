@@ -27,6 +27,7 @@ module.exports = function(grunt) {
         getConfig || grunt.config.set('browser_notifications.options', {})
         getConfig('port') || grunt.config.set('browser_notifications.options.port', 37902)
         getConfig('wsUrl') || grunt.config.set('browser_notifications.options.wsUrl', '/grunt-browser-notifications')
+        getConfig('reconnectFrequency') || grunt.config.set('browser_notifications.options.reconnectFrequency', 10) // Short to try and ensure we're connected before any messages occur
     })
 
     ;(function setupClient(err) {
@@ -36,7 +37,7 @@ module.exports = function(grunt) {
             debug('Creating client to ' + getConfig('port'))
             wsClient = new WebSocket('ws://localhost:' + getConfig('port'))
             wsClient.on('error', setupClient)
-        }, 1000) // Don't hog the loop
+        }, getConfig('reconnectFrequency')) // Don't hog the loop
     })()
 
     hooker.hook(grunt.log, 'error', function(msg) {
